@@ -28,12 +28,13 @@ const TRADITION_COLORS: Record<Tradition, string> = {
 interface Props {
   idea: Idea;
   isCenter?: boolean;
+  isOffAxis?: boolean;
   connection?: Connection;
   position?: 'ancestor' | 'challenger' | 'descendant';
   onClick?: () => void;
 }
 
-export function IdeaNode({ idea, isCenter, connection, onClick }: Props) {
+export function IdeaNode({ idea, isCenter, isOffAxis, connection, onClick }: Props) {
   const tradColor = TRADITION_COLORS[idea.tradition];
   const connMeta = connection ? CONN_META[connection.type] : null;
 
@@ -42,9 +43,9 @@ export function IdeaNode({ idea, isCenter, connection, onClick }: Props) {
       onClick={onClick}
       style={{
         background: isCenter ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.03)',
-        border: `1px solid ${isCenter ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.1)'}`,
-        borderRadius: 12,
-        padding: isCenter ? '18px 22px' : '11px 14px',
+        border: `1px solid ${isCenter ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)'}`,
+        borderRadius: 10,
+        padding: isCenter ? '18px 22px' : isOffAxis ? '8px 11px' : '11px 14px',
         cursor: onClick ? 'pointer' : 'default',
         boxShadow: isCenter ? '0 0 60px rgba(255,255,255,0.04)' : 'none',
         backdropFilter: 'blur(10px)',
@@ -56,19 +57,19 @@ export function IdeaNode({ idea, isCenter, connection, onClick }: Props) {
       onMouseEnter={e => {
         if (!onClick) return;
         const el = e.currentTarget as HTMLDivElement;
-        el.style.background = 'rgba(255,255,255,0.09)';
-        el.style.borderColor = 'rgba(255,255,255,0.25)';
-        el.style.transform = 'scale(1.02)';
+        el.style.background = 'rgba(255,255,255,0.08)';
+        el.style.borderColor = 'rgba(255,255,255,0.2)';
+        if (!isOffAxis) el.style.transform = 'scale(1.02)';
       }}
       onMouseLeave={e => {
         if (!onClick) return;
         const el = e.currentTarget as HTMLDivElement;
         el.style.background = isCenter ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.03)';
-        el.style.borderColor = isCenter ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.1)';
+        el.style.borderColor = isCenter ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)';
         el.style.transform = 'scale(1)';
       }}
     >
-      {connMeta && (
+      {connMeta && !isOffAxis && (
         <div style={{
           fontSize: 9,
           color: connMeta.color,
@@ -87,35 +88,35 @@ export function IdeaNode({ idea, isCenter, connection, onClick }: Props) {
       )}
 
       <div style={{
-        fontSize: isCenter ? 17 : 13,
+        fontSize: isCenter ? 17 : isOffAxis ? 11 : 13,
         fontWeight: isCenter ? 600 : 500,
-        color: '#fff',
+        color: isOffAxis ? 'rgba(255,255,255,0.7)' : '#fff',
         lineHeight: 1.3,
-        marginBottom: 6,
+        marginBottom: isOffAxis ? 3 : 6,
       }}>
         {idea.title}
       </div>
 
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 5, alignItems: 'center', flexWrap: 'wrap' }}>
         <span style={{
-          fontSize: 10,
-          color: tradColor,
-          background: `${tradColor}22`,
-          padding: '2px 7px',
+          fontSize: isOffAxis ? 9 : 10,
+          color: isOffAxis ? 'rgba(255,255,255,0.3)' : tradColor,
+          background: isOffAxis ? 'rgba(255,255,255,0.05)' : `${tradColor}22`,
+          padding: '1px 6px',
           borderRadius: 4,
           fontWeight: 500,
         }}>
           {idea.tradition}
         </span>
-        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>
+        <span style={{ fontSize: isOffAxis ? 9 : 10, color: 'rgba(255,255,255,0.25)' }}>
           {idea.era}
         </span>
-        {idea.originType === 'ORAL' && (
+        {!isOffAxis && idea.originType === 'ORAL' && (
           <span style={{ fontSize: 9, color: '#c04aff', background: '#c04aff22', padding: '2px 6px', borderRadius: 4 }}>
             oral
           </span>
         )}
-        {idea.originType === 'COLLECTIVE' && (
+        {!isOffAxis && idea.originType === 'COLLECTIVE' && (
           <span style={{ fontSize: 9, color: '#4affaa', background: '#4affaa22', padding: '2px 6px', borderRadius: 4 }}>
             collective
           </span>

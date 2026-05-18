@@ -69,25 +69,32 @@ export function getGraphNodes(state: GraphState): GraphNodes {
   const ancestors: GraphNodeItem[] = [];
   const challengers: GraphNodeItem[] = [];
   const descendants: GraphNodeItem[] = [];
+  // Deduplicate across all three axes
+  const seen = new Set<string>([centerId]);
 
   for (const conn of connections) {
     if (conn.toId === centerId && ANCESTOR_TYPES.has(conn.type)) {
       const idea = ideas.get(conn.fromId);
-      if (idea) ancestors.push({ idea, connection: conn });
+      if (idea && !seen.has(idea.id)) { ancestors.push({ idea, connection: conn }); seen.add(idea.id); }
     }
+  }
+  for (const conn of connections) {
     if (conn.toId === centerId && CHALLENGER_TYPES.has(conn.type)) {
       const idea = ideas.get(conn.fromId);
-      if (idea) challengers.push({ idea, connection: conn });
+      if (idea && !seen.has(idea.id)) { challengers.push({ idea, connection: conn }); seen.add(idea.id); }
     }
+  }
+  for (const conn of connections) {
     if (conn.fromId === centerId && DESCENDANT_TYPES.has(conn.type)) {
       const idea = ideas.get(conn.toId);
-      if (idea) descendants.push({ idea, connection: conn });
+      if (idea && !seen.has(idea.id)) { descendants.push({ idea, connection: conn }); seen.add(idea.id); }
     }
     // PARALLEL and CONVERGENT: show from either direction on the right
     if (conn.toId === centerId && (conn.type === 'PARALLEL' || conn.type === 'CONVERGENT')) {
       const idea = ideas.get(conn.fromId);
-      if (idea && !descendants.find(d => d.idea.id === idea.id)) {
+      if (idea && !seen.has(idea.id)) {
         descendants.push({ idea, connection: conn });
+        seen.add(idea.id);
       }
     }
   }
